@@ -1,7 +1,13 @@
 import axios from 'axios';
 
-// Same-origin `/api` in development (proxied by Vite to Django); the hosted API URL in production.
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+// Same-origin `/api` in development (proxied by Vite to Django); the hosted API
+// URL in production. Accepts the host with or without the `/api` suffix.
+function normaliseBaseUrl(raw) {
+  const url = (raw || '/api').replace(/\/+$/, '');
+  return url.endsWith('/api') ? url : `${url}/api`;
+}
+
+export const API_BASE_URL = normaliseBaseUrl(import.meta.env.VITE_API_BASE_URL);
 
 const client = axios.create({ baseURL: API_BASE_URL, timeout: 90_000 });
 

@@ -2,8 +2,11 @@
 
 A small web application that records insurance claims and the payments made against them, derives each claim's status from its money position, and shows a filterable list with a per-currency totals row.
 
-- **Live app:** _see the deployment section — URL added after first deploy_
-- **API:** _added after first deploy_ (`/api/claims/`, `/api/health/`)
+- **Live app:** https://claims-register.vercel.app
+- **API:** https://claims-register-api.onrender.com/api/claims/ (health: [`/api/health/`](https://claims-register-api.onrender.com/api/health/))
+- **Repository:** https://github.com/emmanuel197/claims-register
+
+> The API runs on Render's free tier and sleeps after 15 minutes idle — the first request can take 30–60 seconds while it wakes. The UI shows a note while it waits.
 - **Stack:** Django 5.2 + Django REST Framework on Render · React 19 + Vite + Tailwind 4 on Vercel · PostgreSQL on Neon
 
 ```
