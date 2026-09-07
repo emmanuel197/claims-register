@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { cn } from '../../utils/cn.js';
 
@@ -20,9 +21,18 @@ const sizes = {
   lg: 'h-11 px-5 text-[15px]',
 };
 
-export default function Button({ variant = 'primary', size = 'default', loading = false, className, children, ...props }) {
+/** Button, or a router Link styled as one when `to` is given (avoids nesting <a> and <button>). */
+export default function Button({ variant = 'primary', size = 'default', loading = false, to, className, children, ...props }) {
+  const classes = cn(base, variants[variant], sizes[size], className);
+  if (to) {
+    return (
+      <Link to={to} className={classes} {...props}>
+        {children}
+      </Link>
+    );
+  }
   return (
-    <button className={cn(base, variants[variant], sizes[size], className)} disabled={props.disabled || loading} {...props}>
+    <button className={classes} disabled={props.disabled || loading} {...props}>
       {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
       {children}
     </button>

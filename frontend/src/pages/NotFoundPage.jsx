@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { SearchX } from 'lucide-react';
 import Button from '../components/ui/Button.jsx';
 import { EmptyState } from '../components/ui/Feedback.jsx';
@@ -11,9 +10,9 @@ export default function NotFoundPage() {
         title="Page not found"
         description="That address does not exist in the register."
         action={
-          <Link to="/">
-            <Button variant="outline">Back to claims</Button>
-          </Link>
+          <Button to="/" variant="outline">
+            Back to claims
+          </Button>
         }
       />
     </div>

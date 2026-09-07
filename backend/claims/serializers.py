@@ -156,7 +156,7 @@ class PaymentReadSerializer(serializers.ModelSerializer):
 class PaymentWriteSerializer(serializers.ModelSerializer):
     """Record a payment against `context["claim"]`.
 
-    Rules (ADR-02): same currency → rate is 1 (a supplied rate ≠ 1 is rejected);
+    Rules (see README "Money and currency"): same currency → rate is 1 (a supplied rate ≠ 1 is rejected);
     different currency → rate required and > 0. The converted amount is
     computed here, once, and stored.
     """
@@ -208,20 +208,24 @@ class PaymentWriteSerializer(serializers.ModelSerializer):
 # --- Totals -----------------------------------------------------------------
 
 
+# Sums can exceed a single amount's 14 digits; these fields are output-only.
+SUM_FIELD_KWARGS = {"max_digits": 20, "decimal_places": 2}
+
+
 class CurrencyTotalsSerializer(serializers.Serializer):
     """One footer row. Maps the `sum_*` aggregate aliases onto readable names."""
 
     currency = serializers.CharField()
     claims = serializers.IntegerField()
-    estimated_loss_amount = serializers.DecimalField(**MONEY_FIELD_KWARGS, source="sum_estimated")
-    approved_amount = serializers.DecimalField(**MONEY_FIELD_KWARGS, source="sum_approved")
-    total_paid = serializers.DecimalField(**MONEY_FIELD_KWARGS, source="sum_total_paid")
-    paid_on_settled = serializers.DecimalField(**MONEY_FIELD_KWARGS, source="sum_paid_on_settled")
-    paid_on_reserved = serializers.DecimalField(**MONEY_FIELD_KWARGS, source="sum_paid_on_reserved")
-    outstanding_balance = serializers.DecimalField(**MONEY_FIELD_KWARGS, source="sum_outstanding")
-    overpaid = serializers.DecimalField(**MONEY_FIELD_KWARGS, source="sum_overpaid")
+    estimated_loss_amount = serializers.DecimalField(**SUM_FIELD_KWARGS, source="sum_estimated")
+    approved_amount = serializers.DecimalField(**SUM_FIELD_KWARGS, source="sum_approved")
+    total_paid = serializers.DecimalField(**SUM_FIELD_KWARGS, source="sum_total_paid")
+    paid_on_settled = serializers.DecimalField(**SUM_FIELD_KWARGS, source="sum_paid_on_settled")
+    paid_on_reserved = serializers.DecimalField(**SUM_FIELD_KWARGS, source="sum_paid_on_reserved")
+    outstanding_balance = serializers.DecimalField(**SUM_FIELD_KWARGS, source="sum_outstanding")
+    overpaid = serializers.DecimalField(**SUM_FIELD_KWARGS, source="sum_overpaid")
 
 
 class PaymentCurrencyTotalsSerializer(serializers.Serializer):
     currency = serializers.CharField()
-    amount = serializers.DecimalField(**MONEY_FIELD_KWARGS)
+    amount = serializers.DecimalField(**SUM_FIELD_KWARGS)

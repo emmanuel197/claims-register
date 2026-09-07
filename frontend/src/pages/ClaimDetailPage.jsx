@@ -63,7 +63,9 @@ export default function ClaimDetailPage() {
         <Link to="/" className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800">
           <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to claims
         </Link>
-        <Alert title={claim.error.message === 'No Claim matches the given query.' ? 'Claim not found' : 'Could not load claim'}>{claim.error.message}</Alert>
+        <Alert title={claim.error.status === 404 ? 'Claim not found' : 'Could not load claim'}>
+          {claim.error.status === 404 ? `There is no claim with id ${id}.` : claim.error.message}
+        </Alert>
       </div>
     );
   }
@@ -76,7 +78,7 @@ export default function ClaimDetailPage() {
 
       {/* Header card */}
       <section className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
-        {claim.loading || !c ? (
+        {!c ? (
           <div className="space-y-4">
             <Skeleton className="h-7 w-64" />
             <Skeleton className="h-4 w-96" />
@@ -206,7 +208,8 @@ export default function ClaimDetailPage() {
             initial={
               modal.reverse
                 ? {
-                    amount: String(-Number(modal.reverse.amount)),
+                    // Negate the string, not a float: money never goes through Number on its way to the API.
+                    amount: modal.reverse.amount.startsWith('-') ? modal.reverse.amount.slice(1) : `-${modal.reverse.amount}`,
                     currency: modal.reverse.currency,
                     exchange_rate: modal.reverse.exchange_rate,
                     reference: `Reversal of payment #${modal.reverse.id}`,

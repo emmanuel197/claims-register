@@ -29,7 +29,7 @@ def env_list(name: str, default: str) -> list[str]:
 # --- Security ---------------------------------------------------------------
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-insecure-key-set-SECRET_KEY-in-production")
-DEBUG = env_bool("DEBUG", True)
+DEBUG = env_bool("DEBUG", False)  # .env.example turns it on for local development
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "localhost,127.0.0.1")
 
 # --- Applications -----------------------------------------------------------
@@ -98,6 +98,8 @@ STORAGES = {
 # --- CORS -------------------------------------------------------------------
 
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+# Vercel preview deployments get their own subdomain; allow them by pattern.
+CORS_ALLOWED_ORIGIN_REGEXES = env_list("CORS_ALLOWED_ORIGIN_REGEXES", r"^https://[a-z0-9-]+\.vercel\.app$")
 
 # --- Django REST Framework --------------------------------------------------
 

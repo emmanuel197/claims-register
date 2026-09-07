@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { listClaims, getMeta } from '../api/claims.api.js';
 import useApi from '../hooks/useApi.js';
@@ -59,11 +59,9 @@ export default function ClaimsListPage() {
             {claims.data ? `${claims.data.count} claim${claims.data.count === 1 ? '' : 's'} match the current filters.` : 'Loading the register…'}
           </p>
         </div>
-        <Link to="/claims/new">
-          <Button>
-            <Plus className="h-4 w-4" aria-hidden="true" /> Register claim
-          </Button>
-        </Link>
+        <Button to="/claims/new">
+          <Plus className="h-4 w-4" aria-hidden="true" /> Register claim
+        </Button>
       </div>
 
       <FilterBar value={filters} onChange={(next) => update(next)} currencies={meta.data?.currencies ?? []} />

@@ -14,11 +14,13 @@ API views.
 from datetime import date
 from decimal import Decimal
 
-from django.db import transaction
+from django.db.models import F
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, status, viewsets
+from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .filters import ClaimFilter
 from .models import Claim, ClaimStatus, Currency, LossNature, Payment
@@ -67,6 +69,21 @@ class MetaView(APIView):
         )
 
 
+class NullsLastOrderingFilter(OrderingFilter):
+    """Keep claims without a balance (Reserved) at the bottom whichever way you sort."""
+
+    def filter_queryset(self, request, queryset, view):
+        ordering = self.get_ordering(request, queryset, view)
+        if not ordering:
+            return queryset
+        expressions = []
+        for term in ordering:
+            desc = term.startswith("-")
+            field = F(term.lstrip("-"))
+            expressions.append(field.desc(nulls_last=True) if desc else field.asc(nulls_last=True))
+        return queryset.order_by(*expressions)
+
+
 class ClaimViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
@@ -77,6 +94,7 @@ class ClaimViewSet(
     """Claims. No delete: a register keeps its history (payments are PROTECTed)."""
 
     queryset = Claim.objects.with_financials()
+    filter_backends = [DjangoFilterBackend, NullsLastOrderingFilter]
     filterset_class = ClaimFilter
     ordering_fields = ["loss_date", "date_notified", "estimated_loss_amount", "outstanding_balance", "id"]
     ordering = ["-date_notified", "-id"]
@@ -133,8 +151,7 @@ class PaymentListCreateView(APIView):
         claim = get_object_or_404(Claim, pk=claim_id)
         serializer = PaymentWriteSerializer(data=request.data, context={"claim": claim})
         serializer.is_valid(raise_exception=True)
-        with transaction.atomic():
-            payment = serializer.save()
+        payment = serializer.save()
         refreshed = Claim.objects.with_financials().get(pk=claim.pk)
         return Response(
             {"payment": PaymentReadSerializer(payment).data, "claim": ClaimReadSerializer(refreshed).data},

@@ -3,7 +3,7 @@ import { Input, MoneyInput, Select } from '../../components/forms/Field.jsx';
 import Button from '../../components/ui/Button.jsx';
 import { Alert } from '../../components/ui/Feedback.jsx';
 import { parseApiError } from '../../api/client.js';
-import { formatMoney, previewConversion, todayIso } from '../../utils/format.js';
+import { formatDate, formatMoney, previewConversion, todayIso } from '../../utils/format.js';
 import { indicativeRate } from '../../utils/statuses.js';
 
 /**
@@ -102,7 +102,7 @@ export default function PaymentForm({ claim, meta, initial, onSubmit, onCancel }
               initial
                 ? 'Reversals reuse the original rate so the pair nets to zero.'
                 : rates
-                  ? `Prefilled from indicative rates as of ${rates.as_of} — confirm or edit before saving.`
+                  ? `Prefilled from indicative rates as of ${formatDate(rates.as_of)} — confirm or edit before saving.`
                   : 'Rate used to convert into the claim currency.'
             }
           />

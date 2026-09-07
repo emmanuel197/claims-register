@@ -40,7 +40,7 @@ Tests and smoke checks:
 ```bash
 cd backend
 python manage.py test                # 55 tests: rounding, status, constraints, totals identities, API
-./scripts/smoke.sh                   # curl + jq against a running API; also works against the hosted URL
+bash scripts/smoke.sh                # curl + jq against a running API; pass the hosted URL to check production
 ```
 
 Postgres is required (SQLite is deliberately unsupported): money columns are `numeric` and the totals row is summed in SQL, which SQLite would do in floating point. Settings refuse to start without a Postgres `DATABASE_URL`.
@@ -140,5 +140,5 @@ The brief left several things open; these are the calls I made.
 
 ## Deployment
 
-- **API (Render):** blueprint in `backend/render.yaml` — Python web service, root `backend/`, build `./build.sh` (installs, collects static, migrates, seeds), start `gunicorn`. Environment: `DATABASE_URL` (Neon), `CORS_ALLOWED_ORIGINS` (the Vercel URL), `SECRET_KEY`, `DEBUG=False`, `ALLOWED_HOSTS=.onrender.com`.
+- **API (Render):** blueprint in `render.yaml` at the repo root — Python web service with root directory `backend/`, build `bash build.sh` (installs, collects static, migrates, seeds), start `gunicorn`. Environment: `DATABASE_URL` (Neon), `CORS_ALLOWED_ORIGINS` (the Vercel URL), `SECRET_KEY`, `DEBUG=False`, `ALLOWED_HOSTS=.onrender.com`.
 - **Frontend (Vercel):** root `frontend/`, framework Vite, environment `VITE_API_BASE_URL=https://<render-service>.onrender.com/api`. `vercel.json` rewrites all routes to `index.html` for client-side routing.

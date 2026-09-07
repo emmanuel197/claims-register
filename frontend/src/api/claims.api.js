@@ -1,6 +1,16 @@
 import client from './client.js';
 
-export const getMeta = () => client.get('/meta/').then((r) => r.data);
+// Form options and indicative rates change only on deploy: fetch once per page load.
+let metaPromise = null;
+export const getMeta = () => {
+  if (!metaPromise) {
+    metaPromise = client.get('/meta/').then((r) => r.data).catch((err) => {
+      metaPromise = null; // allow a retry after a failure
+      throw err;
+    });
+  }
+  return metaPromise;
+};
 
 export const listClaims = (params) => client.get('/claims/', { params }).then((r) => r.data);
 

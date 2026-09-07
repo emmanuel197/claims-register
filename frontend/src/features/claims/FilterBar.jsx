@@ -27,7 +27,8 @@ export default function FilterBar({ value, onChange, currencies = [] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  const set = (key) => (e) => onChange({ ...value, [key]: e.target.value });
+  // Carry the (possibly not-yet-debounced) search text so a quick filter change never drops it.
+  const set = (key) => (e) => onChange({ ...value, search, [key]: e.target.value });
   const isDirty = Object.keys(EMPTY_FILTERS).some((k) => value[k] !== EMPTY_FILTERS[k]);
 
   return (

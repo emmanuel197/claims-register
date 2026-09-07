@@ -44,12 +44,38 @@ export function todayIso() {
   return new Date().toISOString().slice(0, 10);
 }
 
-/** Round half-up to 2 dp for the payment preview. Server value is authoritative. */
+/**
+ * Preview of amount × rate rounded half-up to 2 dp, computed in integer
+ * arithmetic (BigInt) so it matches the server's Decimal result even at the
+ * .005 boundary. Display only — the stored value comes back from the API.
+ */
 export function previewConversion(amount, rate) {
-  const a = Number(amount);
-  const r = Number(rate);
-  if (!Number.isFinite(a) || !Number.isFinite(r)) return null;
-  const scaled = Math.abs(a * r) * 100;
-  const rounded = Math.round(scaled + Number.EPSILON) / 100;
-  return (a * r < 0 ? -rounded : rounded).toFixed(2);
+  const a = parseDecimal(amount);
+  const r = parseDecimal(rate);
+  if (!a || !r) return null;
+  // product has a.scale + r.scale decimal places; we want 2.
+  const scale = a.scale + r.scale;
+  let product = a.digits * r.digits;
+  const negative = product < 0n;
+  if (negative) product = -product;
+  let cents;
+  if (scale <= 2) {
+    cents = product * 10n ** BigInt(2 - scale);
+  } else {
+    const divisor = 10n ** BigInt(scale - 2);
+    cents = product / divisor;
+    if ((product % divisor) * 2n >= divisor) cents += 1n; // half-up
+  }
+  const text = cents.toString().padStart(3, '0');
+  return `${negative && cents !== 0n ? '-' : ''}${text.slice(0, -2)}.${text.slice(-2)}`;
+}
+
+/** "-12.345" -> { digits: -12345n, scale: 3 }; null if not a plain decimal. */
+function parseDecimal(value) {
+  const s = String(value ?? '').trim();
+  const m = /^(-?)(\d*)(?:\.(\d*))?$/.exec(s);
+  if (!m || (m[2] === '' && (m[3] ?? '') === '')) return null;
+  const frac = m[3] ?? '';
+  const digits = BigInt(`${m[1]}${m[2] || '0'}${frac}`);
+  return { digits, scale: frac.length };
 }

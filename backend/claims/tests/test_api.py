@@ -238,11 +238,11 @@ class ClaimListTests(APITestCase):
     def test_search(self):
         self.assertEqual(self.get(search="b")["count"], 1)
 
-    def test_ordering_by_annotation(self):
-        body = self.get(ordering="outstanding_balance")
-        balances = [r["outstanding_balance"] for r in body["results"]]
-        # NULLs sort first in ascending order on Postgres? No — NULLS LAST is the default for ASC.
-        self.assertEqual(balances[:2], ["0.00", "300.00"])
+    def test_ordering_by_annotation_keeps_reserved_last(self):
+        asc = [r["outstanding_balance"] for r in self.get(ordering="outstanding_balance")["results"]]
+        self.assertEqual(asc, ["0.00", "300.00", None])
+        desc = [r["outstanding_balance"] for r in self.get(ordering="-outstanding_balance")["results"]]
+        self.assertEqual(desc, ["300.00", "0.00", None])
 
     def test_empty_result_has_no_totals(self):
         body = self.get(currency="GBP")

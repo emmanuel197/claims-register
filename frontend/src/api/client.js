@@ -10,6 +10,7 @@ const client = axios.create({ baseURL: API_BASE_URL, timeout: 90_000 });
  * DRF's field-keyed validation errors under the right inputs.
  */
 export function parseApiError(error) {
+  const status = error?.response?.status ?? null;
   const data = error?.response?.data;
   if (data && typeof data === 'object') {
     const fields = {};
@@ -21,10 +22,10 @@ export function parseApiError(error) {
       else fields[key] = text;
     }
     if (!message && Object.keys(fields).length) message = 'Please fix the highlighted fields.';
-    return { message: message || 'Request failed.', fields };
+    return { status, message: message || 'Request failed.', fields };
   }
-  if (error?.code === 'ECONNABORTED') return { message: 'The API took too long to respond. Please try again.', fields: {} };
-  return { message: error?.message || 'Network error — is the API running?', fields: {} };
+  if (error?.code === 'ECONNABORTED') return { status, message: 'The API took too long to respond. Please try again.', fields: {} };
+  return { status, message: error?.message || 'Network error — is the API running?', fields: {} };
 }
 
 export default client;
