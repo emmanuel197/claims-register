@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+/* Design tokens (Tailwind v4 theme). Semantic colours have a strong shade for
+   badges/icons and a bg/text pair that meets 4.5:1 for body copy. */
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-primary-50: #eaf2fc;
+  --color-primary-100: #cce0f8;
+  --color-primary-200: #99c0f0;
+  --color-primary-300: #5c99e6;
+  --color-primary-400: #2e79d6;
+  --color-primary-500: #0c5fc5;
+  --color-primary-600: #0a4fa6;
+  --color-primary-700: #093f84;
+
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #f7f8fa;
+  --color-neutral-100: #eef0f4;
+  --color-neutral-200: #e2e5eb;
+  --color-neutral-300: #cbd0d9;
+  --color-neutral-400: #9aa2b1;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #4b5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1f2733;
+  --color-neutral-900: #0f141b;
+
+  --color-success: #1f9d57;
+  --color-success-bg: #e6f6ee;
+  --color-success-text: #13753f;
+  --color-warning: #c77700;
+  --color-warning-bg: #fff4e0;
+  --color-warning-text: #945800;
+  --color-error: #d92d20;
+  --color-error-bg: #fdecea;
+  --color-error-text: #a31c12;
+  --color-info: #0c5fc5;
+  --color-info-bg: #eaf2fc;
+  --color-info-text: #093f84;
+
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  --shadow-sm: 0 1px 2px rgba(15, 20, 27, 0.06), 0 1px 3px rgba(15, 20, 27, 0.08);
+  --shadow-md: 0 4px 12px rgba(15, 20, 27, 0.08), 0 2px 4px rgba(15, 20, 27, 0.05);
+  --shadow-lg: 0 12px 32px rgba(15, 20, 27, 0.12), 0 4px 8px rgba(15, 20, 27, 0.06);
+}
+
+body {
+  margin: 0;
+  background: var(--color-neutral-50);
+  color: var(--color-neutral-800);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+/* Every number in the register lines up. */
+.num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scale-in {
+  from { transform: scale(0.96) translateY(4px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes shimmer {
+  from { background-position: -600px 0; }
+  to { background-position: 600px 0; }
+}
+.animate-fade-in { animation: fade-in 150ms ease-out both; }
+.animate-scale-in { animation: scale-in 180ms cubic-bezier(0.22, 0.68, 0, 1.2) both; }
+.animate-shimmer {
+  background: linear-gradient(90deg, var(--color-neutral-100) 25%, var(--color-neutral-50) 50%, var(--color-neutral-100) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
