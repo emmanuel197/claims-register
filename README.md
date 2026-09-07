@@ -29,7 +29,7 @@ python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\a
 pip install -r requirements.txt
 cp .env.example .env                                  # DATABASE_URL already points at the docker db
 python manage.py migrate
-python manage.py seed_claims                          # 18 sample claims, idempotent
+python manage.py seed_claims                          # 19 sample claims, idempotent
 python manage.py runserver                            # http://localhost:8000/api/claims/
 
 # 3. Frontend (new terminal)
@@ -42,7 +42,7 @@ Tests and smoke checks:
 
 ```bash
 cd backend
-python manage.py test                # 55 tests: rounding, status, constraints, totals identities, API
+python manage.py test                # 57 tests: rounding, status, constraints, totals identities, API
 bash scripts/smoke.sh                # curl + jq against a running API; pass the hosted URL to check production
 ```
 
@@ -61,7 +61,8 @@ insured_name                            amount                  what was actuall
 loss_date            indexed            currency                … and in which currency
 date_notified        indexed            exchange_rate           claim ccy per 1 payment ccy (1 when same)
 loss_nature          enum               amount_in_claim_currency  amount × rate, rounded once, stored
-currency             GHS|USD|EUR|GBP    reference
+loss_description     free text          reference
+currency             GHS|USD|EUR|GBP
 estimated_loss_amount  numeric(14,2)
 approved_amount        numeric(14,2), null until settled
 approved_at
@@ -125,7 +126,7 @@ The brief left several things open; these are the calls I made.
 
 **Validation**
 - No date may be in the future ("today" is UTC on the server; Ghana is on GMT). `date_notified >= loss_date`; `payment_date >= loss_date`. `estimated_loss_amount > 0`; `payment.amount != 0`.
-- `policy_number` is not unique (a policy can have several claims). Four currencies and eight loss natures are supported.
+- `policy_number` is not unique (a policy can have several claims). Four currencies and eight loss natures are supported; a free-text `loss_description` is optional except when the nature is *Other*, where it is required so the register never holds an "Other" with no explanation.
 
 **Seed and hosting**
 - `seed_claims` is idempotent on `(policy_number, loss_date)` and runs on every deploy, so claims a reviewer enters survive redeploys and the 18 samples are never duplicated. Claim numbers come from the database sequence and may have gaps.

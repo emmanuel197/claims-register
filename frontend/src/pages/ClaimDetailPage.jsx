@@ -117,6 +117,12 @@ export default function ClaimDetailPage() {
               <Fact label="Nature of loss" value={c.loss_nature_label} />
               <Fact label="Reserve currency" value={c.currency} />
             </div>
+            {c.loss_description && (
+              <div className="mt-4">
+                <p className="text-xs text-neutral-500">Description of loss</p>
+                <p className="mt-0.5 text-sm text-neutral-800">{c.loss_description}</p>
+              </div>
+            )}
           </>
         )}
       </section>

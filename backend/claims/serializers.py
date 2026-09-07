@@ -8,7 +8,7 @@ from decimal import Decimal
 from django.utils import timezone
 from rest_framework import serializers
 
-from .models import Claim, ClaimStatus, Payment
+from .models import Claim, ClaimStatus, LossNature, Payment
 from .money import MONEY_FIELD_KWARGS, ONE, RATE_FIELD_KWARGS, to_claim_currency
 
 
@@ -41,12 +41,14 @@ class ClaimWriteSerializer(serializers.ModelSerializer):
             "loss_date",
             "date_notified",
             "loss_nature",
+            "loss_description",
             "currency",
             "estimated_loss_amount",
             "approved_amount",
         ]
         extra_kwargs = {
             "estimated_loss_amount": {"min_value": Decimal("0.01")},
+            "loss_description": {"required": False, "allow_blank": True, "trim_whitespace": True},
         }
 
     def validate_loss_date(self, value):
@@ -62,6 +64,13 @@ class ClaimWriteSerializer(serializers.ModelSerializer):
         if loss_date and date_notified and date_notified < loss_date:
             raise serializers.ValidationError(
                 {"date_notified": "Date notified cannot be before the loss date."}
+            )
+
+        nature = attrs.get("loss_nature", getattr(instance, "loss_nature", None))
+        description = attrs.get("loss_description", getattr(instance, "loss_description", ""))
+        if nature == LossNature.OTHER and not (description or "").strip():
+            raise serializers.ValidationError(
+                {"loss_description": "Describe the loss when the nature is 'Other'."}
             )
 
         if instance is not None:
@@ -117,6 +126,7 @@ class ClaimReadSerializer(serializers.ModelSerializer):
             "date_notified",
             "loss_nature",
             "loss_nature_label",
+            "loss_description",
             "currency",
             "estimated_loss_amount",
             "approved_amount",

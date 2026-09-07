@@ -52,6 +52,24 @@ class ClaimCreateTests(APITestCase):
         self.assertEqual(r.json()["status"], "settled_outstanding")
         self.assertIsNotNone(r.json()["approved_at"])
 
+    def test_other_loss_nature_requires_a_description(self):
+        r = self.client.post("/api/claims/", {**VALID_CLAIM, "loss_nature": "other"}, format="json")
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("loss_description", r.json())
+
+        r = self.client.post(
+            "/api/claims/",
+            {**VALID_CLAIM, "loss_nature": "other", "loss_description": "Livestock struck by lightning"},
+            format="json",
+        )
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertEqual(r.json()["loss_description"], "Livestock struck by lightning")
+
+    def test_description_is_optional_for_named_natures(self):
+        r = self.client.post("/api/claims/", VALID_CLAIM, format="json")
+        self.assertEqual(r.status_code, 201)
+        self.assertEqual(r.json()["loss_description"], "")
+
     def test_validation_errors_are_field_keyed(self):
         future = (timezone.localdate() + timedelta(days=1)).isoformat()
         cases = {

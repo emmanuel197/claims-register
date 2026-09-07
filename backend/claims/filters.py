@@ -40,4 +40,6 @@ class ClaimFilter(django_filters.FilterSet):
         value = value.strip()
         if not value:
             return queryset
-        return queryset.filter(Q(policy_number__icontains=value) | Q(insured_name__icontains=value))
+        return queryset.filter(
+            Q(policy_number__icontains=value) | Q(insured_name__icontains=value) | Q(loss_description__icontains=value)
+        )

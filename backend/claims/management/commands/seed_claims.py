@@ -1,5 +1,5 @@
 """
-Seed the register with 18 sample claims (brief asks for at least fifteen).
+Seed the register with 19 sample claims (brief asks for at least fifteen).
 
 Idempotent: a claim is identified by (policy_number, loss_date); existing
 claims are left untouched, so data entered by a reviewer survives redeploys.
@@ -61,7 +61,20 @@ SEED = [
      [(date(2026, 5, 9), D("20000.00"), "USD", D("0.78"), "Paid to US-based loss assessor")]),
     ("UK-THF-40044", "Amelia Clarke", date(2026, 8, 11), date(2026, 8, 12), "theft", "GBP", D("2750.00"), D("2600.00"),
      [(date(2026, 8, 28), D("2600.00"), "GBP", None, "Settled in full")]),
+    # --- "Other" nature: the free-text description says what actually happened
+    ("GH-OTH-10203", "Nkrumah Poultry Farms", date(2026, 7, 26), date(2026, 7, 27), "other", "GHS", D("31000.00"), None, []),
 ]
+
+# Optional free text per claim (required by the API when the nature is "other").
+DESCRIPTIONS = {
+    "GH-OTH-10203": "Lightning strike killed 1,200 birds; not covered by the fire or flood perils",
+    "GH-MOT-10021": "Rear-end collision on the Tema motorway; third-party vehicle",
+    "GH-FIR-10077": "Electrical fire in the main warehouse, stock and racking destroyed",
+    "GH-FLD-10135": "June floods; ground-floor storage under 40 cm of water",
+    "US-MAR-20041": "Container lost overboard in heavy weather off Charleston",
+    "EU-LIA-30038": "Customer slipped on wet floor; medical costs and lost earnings",
+    "UK-MAR-40009": "Hull damage after grounding at low tide",
+}
 
 
 class Command(BaseCommand):
@@ -71,7 +84,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         created = skipped = 0
         for policy, insured, loss, notified, nature, ccy, estimated, approved, payments in SEED:
-            if Claim.objects.filter(policy_number=policy, loss_date=loss).exists():
+            existing = Claim.objects.filter(policy_number=policy, loss_date=loss).first()
+            if existing is not None:
+                # Only backfill a description on rows seeded before the field existed; never touch money.
+                if not existing.loss_description and DESCRIPTIONS.get(policy):
+                    existing.loss_description = DESCRIPTIONS[policy]
+                    existing.save(update_fields=["loss_description"])
                 skipped += 1
                 continue
             claim = Claim.objects.create(
@@ -80,6 +98,7 @@ class Command(BaseCommand):
                 loss_date=loss,
                 date_notified=notified,
                 loss_nature=nature,
+                loss_description=DESCRIPTIONS.get(policy, ""),
                 currency=ccy,
                 estimated_loss_amount=estimated,
                 approved_amount=approved,

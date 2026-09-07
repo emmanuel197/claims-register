@@ -51,6 +51,8 @@ class Claim(models.Model):
     loss_date = models.DateField(db_index=True)
     date_notified = models.DateField(db_index=True)
     loss_nature = models.CharField(max_length=20, choices=LossNature.choices)
+    # Free text: what actually happened. Required (at the API) when loss_nature is "other".
+    loss_description = models.CharField(max_length=200, blank=True)
     currency = models.CharField(max_length=3, choices=Currency.choices, db_index=True)
     estimated_loss_amount = models.DecimalField(**MONEY_FIELD_KWARGS)
 

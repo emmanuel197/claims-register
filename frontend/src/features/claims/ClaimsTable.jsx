@@ -85,7 +85,12 @@ export default function ClaimsTable({ claims, totals, outflows, loading, orderin
                 <td className="px-3 py-2.5 text-neutral-800 max-w-[220px] truncate" title={c.insured_name}>{c.insured_name}</td>
                 <td className="px-3 py-2.5 num text-left text-neutral-700">{formatDate(c.loss_date)}</td>
                 <td className="px-3 py-2.5 num text-left text-neutral-700">{formatDate(c.date_notified)}</td>
-                <td className="px-3 py-2.5 text-neutral-700">{c.loss_nature_label}</td>
+                <td className="px-3 py-2.5 text-neutral-700 max-w-[200px]" title={c.loss_description || undefined}>
+                  {c.loss_nature_label}
+                  {c.loss_nature === 'other' && c.loss_description && (
+                    <span className="block truncate text-xs text-neutral-500">{c.loss_description}</span>
+                  )}
+                </td>
                 <td className="px-3 py-2.5 font-semibold text-neutral-600">{c.currency}</td>
                 <td className="px-3 py-2.5 num text-neutral-700">{formatMoney(c.estimated_loss_amount)}</td>
                 <td className="px-3 py-2.5 num text-neutral-700">{formatMoney(c.approved_amount)}</td>
